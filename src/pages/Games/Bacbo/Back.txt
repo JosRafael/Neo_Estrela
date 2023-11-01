@@ -1,0 +1,111 @@
+import React, { useState, useEffect } from "react";
+import {
+  Container,
+  General,
+  Header,
+  ImageHeader,
+  Main,
+  MainName,
+  MainBody,
+  MainMsg,
+} from "./styles";
+import { AiOutlineArrowLeft } from "react-icons/ai";
+import { Link } from "react-router-dom";
+import IframeRoleta from "../../../components/Lives/iframeRoleta";
+import UserImg from "../../../assets/user.jpg";
+import axios from "axios"; // Importando o Axios
+
+const API_URL = "http://localhost:3001/ultimosNumeros"; // Substitua pela URL do seu servidor Node.js
+
+const Roletas = () => {
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [primeiroNumero, setPrimeiroNumero] = useState(null);
+  const [mensagem, setMensagem] = useState("Estou buscando novas oportunidades!");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(API_URL);
+
+        if (!response.data || !response.data.ultimosNumeros) {
+          throw new Error("Dados inválidos recebidos da API");
+        }
+
+        const jsonData = response.data.ultimosNumeros;
+        setData(jsonData);
+
+        if (jsonData.length > 0) {
+          setPrimeiroNumero(jsonData[0]);
+        } else {
+          setPrimeiroNumero(null);
+        }
+
+        setIsLoading(false);
+
+        setTimeout(() => {
+          setMensagem("Analisando entrada...");
+
+          setTimeout(() => {
+            setMensagem("Digitando...");
+
+            setTimeout(() => {
+              setMensagem("ATENÇÃO... Entrada Encontrada!");
+
+              setTimeout(() => {
+                setMensagem(
+                  <>
+                    Último número: {primeiroNumero}
+                    <br />
+                    Colunas 1 e 2
+                  </>
+                );
+              }, 3000);
+            }, 3000);
+          }, 3000);
+        }, 3000);
+      } catch (error) {
+        console.error("Erro ao buscar dados:", error);
+        setError(error.message);
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    console.log("Dados atualizados:", data);
+  }, [data]);
+
+  return (
+    <Container>
+      <Link to="/home">
+        <AiOutlineArrowLeft color="#fff" size="32" />
+      </Link>
+
+      <General>
+        <Header>
+          <ImageHeader src={UserImg} alt="" />
+        </Header>
+        <Main>
+          <MainMsg>
+            <MainName>Felipe Tylty</MainName>
+            {isLoading ? (
+              <MainBody>{mensagem}</MainBody>
+            ) : error ? (
+              <MainBody>Ocorreu um erro: {error}</MainBody>
+            ) : (
+              <MainBody>{mensagem}</MainBody>
+            )}
+          </MainMsg>
+        </Main>
+      </General>
+
+      <IframeRoleta />
+    </Container>
+  );
+};
+
+export default Roletas;

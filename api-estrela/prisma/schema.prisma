@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  //provider = "postgresql"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  premium_rent Premium[] @relation("email")
+
+  @@map("users")
+}
+
+model Premium {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  emailPro    User     @relation("email", fields: [email], references: [email])
+  name        String
+  telefone    String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("premium")
+}
